@@ -70,6 +70,45 @@ func cleanupProfiles() {
 	}
 }
 
+func makeNavHTML(baseDirPath string) string {
+	return `
+                    <style>
+                        .top-nav {
+                            background: #f0f0f0;
+                            padding: 1px 2px;
+                            margin: 0;
+                            border-bottom: 1px solid #ddd;
+                            line-height: 1.2;
+                            display: flex;
+                            justify-content: space-between;
+                        }
+                        .top-nav a {
+                            margin: 0;
+                            padding: 0 10px 0 5px;
+                            text-decoration: none;
+                            color: #333;
+                            font-size: 13px;
+                            border-right: 1px solid #999;
+                        }
+                        .top-nav a:last-child {
+                            border-right: none;
+                        }
+                        .nav-right {
+                            margin-left: auto;
+                        }
+                    </style>
+                    <div class="top-nav">
+                        <div>
+                            <a href="` + baseDirPath + `/">↑返回上级</a>
+                            <a href="/">⌂根目录</a>
+                        </div>
+                        <div class="nav-right">
+                            <a href="https://github.com/xiateng/pprofsvr" target="_blank">pprofsvr</a>
+                        </div>
+                    </div>
+`
+}
+
 // 修改后的getHandler函数
 func getHandler(fp string) (*PProfHandler, error) {
 	// 检查文件修改时间
@@ -118,42 +157,9 @@ func getHandler(fp string) (*PProfHandler, error) {
 					profilePath := strings.TrimSuffix(currentPath, "/ui"+path)
 					baseDirPath := filepath.Dir(profilePath)
 					// 生成导航栏HTML
-					w.Write([]byte(`
-                    <style>
-                        .top-nav {
-                            background: #f0f0f0;
-                            padding: 1px 2px;
-                            margin: 0;
-                            border-bottom: 1px solid #ddd;
-                            line-height: 1.2;
-                            display: flex;
-                            justify-content: space-between;
-                        }
-                        .top-nav a {
-                            margin: 0;
-                            padding: 0 10px 0 5px;
-                            text-decoration: none;
-                            color: #333;
-                            font-size: 13px;
-                            border-right: 1px solid #999;
-                        }
-                        .top-nav a:last-child {
-                            border-right: none;
-                        }
-                        .nav-right {
-                            margin-left: auto;
-                        }
-                    </style>
-                    <div class="top-nav">
-                        <div>
-                            <a href="` + baseDirPath + `/">↑返回上级</a>
-                            <a href="/">⌂根目录</a>
-                        </div>
-                        <div class="nav-right">
-                            <a href="https://github.com/xiateng/pprofsvr" target="_blank">pprofsvr</a>
-                        </div>
-                    </div>
-					`))
+					if !strings.HasSuffix(currentPath, "/ui/download") {
+						w.Write([]byte(makeNavHTML(baseDirPath)))
+					}
 					handler.ServeHTTP(w, r)
 				})
 			}
