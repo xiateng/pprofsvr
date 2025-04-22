@@ -100,8 +100,48 @@ func getHandler(fp string) (*PProfHandler, error) {
 	opts := &driver.Options{
 		UI: &nullUI{},
 		HTTPServer: func(args *driver.HTTPServerArgs) error {
-			ph.time = time.Now() // 记录加载时间
+			ph.time = time.Now()
 			ph.args = args
+
+			// 保存原始handler
+			originalHandlers := make(map[string]http.Handler)
+			for k, v := range args.Handlers {
+				originalHandlers[k] = v
+			}
+
+			// 添加导航栏包装器
+			for path, handler := range originalHandlers {
+				args.Handlers[path] = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+					// 获取当前请求路径
+					currentPath := r.URL.Path
+					// 提取基础路径（如/test/cpu2.out）
+					profilePath := strings.TrimSuffix(currentPath, "/ui"+path)
+					baseDirPath := filepath.Dir(profilePath)
+					// 生成导航栏HTML
+					w.Write([]byte(`
+                    <style>
+                        .top-nav {
+                            background: #f0f0f0;
+                            padding: 2px 8px;
+                            margin: 0;
+                            border-bottom: 1px solid #ddd;
+                            line-height: 1.2;
+                        }
+                        .top-nav a {
+                            margin: 0 5px;
+                            text-decoration: none;
+                            color: #333;
+                            font-size: 13px;
+                        }
+                    </style>
+                    <div class="top-nav">
+                        <a href="` + baseDirPath + `/">↑返回上级</a>
+                        <a href="/">⌂根目录</a>
+                    </div>
+					`))
+					handler.ServeHTTP(w, r)
+				})
+			}
 			return nil
 		},
 		HTTPTransport: http.DefaultTransport,
