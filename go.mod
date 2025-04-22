@@ -1,4 +1,4 @@
-module git.h29.org/steve/pprofsvr
+module github.com/xiateng/pprofsvr
 
 go 1.23.0
 
