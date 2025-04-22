@@ -122,21 +122,36 @@ func getHandler(fp string) (*PProfHandler, error) {
                     <style>
                         .top-nav {
                             background: #f0f0f0;
-                            padding: 2px 8px;
+                            padding: 1px 2px;
                             margin: 0;
                             border-bottom: 1px solid #ddd;
                             line-height: 1.2;
+                            display: flex;
+                            justify-content: space-between;
                         }
                         .top-nav a {
-                            margin: 0 5px;
+                            margin: 0;
+                            padding: 0 10px 0 5px;
                             text-decoration: none;
                             color: #333;
                             font-size: 13px;
+                            border-right: 1px solid #999;
+                        }
+                        .top-nav a:last-child {
+                            border-right: none;
+                        }
+                        .nav-right {
+                            margin-left: auto;
                         }
                     </style>
                     <div class="top-nav">
-                        <a href="` + baseDirPath + `/">↑返回上级</a>
-                        <a href="/">⌂根目录</a>
+                        <div>
+                            <a href="` + baseDirPath + `/">↑返回上级</a>
+                            <a href="/">⌂根目录</a>
+                        </div>
+                        <div class="nav-right">
+                            <a href="https://github.com/xiateng/pprofsvr" target="_blank">pprofsvr</a>
+                        </div>
                     </div>
 					`))
 					handler.ServeHTTP(w, r)
