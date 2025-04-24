@@ -237,9 +237,11 @@ var myHTMLTemplate = template.Must(template.New("dirlist.html").Funcs(template.F
                 </tr>
             </thead>
             <tbody>
+				{{if not (isRoot .RelPath)}}
                 <tr>
                     <td colspan="3"><a href="{{.RelPath}}/../">.. (上级目录)</a></td>
                 </tr>
+				{{end}}
 
                 {{range .Files}}
                 <tr>
