@@ -131,6 +131,16 @@ var myHTMLTemplate = template.Must(template.New("dirlist.html").Funcs(template.F
 	"split": func(s string, sep string) []string {
 		return strings.Split(s, sep)
 	},
+	"parentPath": func(p string) string {
+		if strings.HasSuffix(p, "/") {
+			p = p[:len(p)-1]
+		}
+		lastSlash := strings.LastIndex(p, "/")
+		if lastSlash == 0 {
+			return "/" // 如果是根目录，返回"/"
+		}
+		return p[:lastSlash] // 返回父目录路径
+	},
 }).Parse(`
 <!DOCTYPE html>
 <html>
@@ -239,20 +249,34 @@ var myHTMLTemplate = template.Must(template.New("dirlist.html").Funcs(template.F
             <tbody>
 				{{if not (isRoot .RelPath)}}
                 <tr>
-                    <td colspan="3"><a href="{{.RelPath}}/../">.. (上级目录)</a></td>
+                    <td colspan="3"><a href="{{parentPath .RelPath}}">.. (上级目录)</a></td>
                 </tr>
-				{{end}}
+                {{end}}
 
+                {{/* 先显示目录 */}}
                 {{range .Files}}
-                <tr>
-                    <td class="{{if .Info.IsDir}}dir-icon{{else}}file-icon{{end}}">
-                        <a href="{{.Path}}" {{if .Download}}download{{end}}>{{.Name}}</a>
-                    </td>
-                    <td class="size">
-                        {{if .Info.IsDir}}-{{else}}{{formatBytes .Info.Size}}{{end}}
-                    </td>
-                    <td class="time">{{formatTime .Info.ModTime}}</td>
-                </tr>
+                    {{if .Info.IsDir}}
+                    <tr>
+                        <td class="dir-icon">
+                            <a href="{{.Path}}">{{.Name}}</a>
+                        </td>
+                        <td class="size">-</td>
+                        <td class="time">{{formatTime .Info.ModTime}}</td>
+                    </tr>
+                    {{end}}
+                {{end}}
+
+                {{/* 再显示文件 */}}
+                {{range .Files}}
+                    {{if not .Info.IsDir}}
+                    <tr>
+                        <td class="file-icon">
+                            <a href="{{.Path}}" {{if .Download}}download{{end}}>{{.Name}}</a>
+                        </td>
+                        <td class="size">{{formatBytes .Info.Size}}</td>
+                        <td class="time">{{formatTime .Info.ModTime}}</td>
+                    </tr>
+                    {{end}}
                 {{end}}
             </tbody>
         </table>
