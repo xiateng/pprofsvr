@@ -14,6 +14,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/pprof/driver"
+	"github.com/kataras/httpfs"
 )
 
 type nullUI struct{}
@@ -201,9 +202,16 @@ func main() {
 
 	r := gin.Default()
 
-	fs := gin.Dir(repoPath, true)
-
-	fileServer := http.FileServer(fs)
+	fileServer := httpfs.FileServer(http.Dir(repoPath), httpfs.Options{
+		IndexName: "/index.html",
+		Compress:  true,
+		ShowList:  true,
+		DirList: DirListRich(httpfs.DirListRichOptions{
+			Tmpl:     myHTMLTemplate,
+			TmplName: "dirlist.html",
+			Title:    "Pprofsvr File Browser",
+		}),
+	})
 
 	// Register GET and HEAD handlers
 	r.GET("/*filepath", func(c *gin.Context) {
@@ -227,27 +235,21 @@ func main() {
 		} else {
 			file := c.Param("filepath")
 			// Check if file exists and/or if we have permission to access it
-			f, err := fs.Open(file)
+			info, err := os.Stat(filepath.Join(repoPath, file))
 			if err != nil {
 				c.Writer.WriteHeader(http.StatusNotFound)
 				return
 			}
-			if info, err := f.Stat(); err != nil {
-				c.AbortWithError(http.StatusInternalServerError, err)
-				return
-			} else {
-				if !info.IsDir() {
-					fp := filepath.Join(repoPath, before)
-					_, err = getHandler(fp)
-					if err != nil {
-						c.AbortWithError(http.StatusInternalServerError, err)
-						return
-					}
-					c.Redirect(http.StatusFound, c.Request.URL.Path+"/ui/")
-				}
-			}
 
-			f.Close()
+			if !info.IsDir() {
+				fp := filepath.Join(repoPath, before)
+				_, err = getHandler(fp)
+				if err != nil {
+					c.AbortWithError(http.StatusInternalServerError, err)
+					return
+				}
+				c.Redirect(http.StatusFound, c.Request.URL.Path+"/ui/")
+			}
 
 			fileServer.ServeHTTP(c.Writer, c.Request)
 		}
