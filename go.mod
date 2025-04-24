@@ -7,6 +7,7 @@ toolchain go1.24.2
 require (
 	github.com/gin-gonic/gin v1.10.0
 	github.com/google/pprof v0.0.0-20250422150753-8047eb6f4084
+	github.com/kataras/httpfs v0.0.7
 )
 
 require (
@@ -24,7 +25,6 @@ require (
 	github.com/ianlancetaylor/demangle v0.0.0-20250417193237-f615e6bd150b // indirect
 	github.com/json-iterator/go v1.1.12 // indirect
 	github.com/kataras/compress v0.0.6 // indirect
-	github.com/kataras/httpfs v0.0.7 // indirect
 	github.com/klauspost/compress v1.10.10 // indirect
 	github.com/klauspost/cpuid/v2 v2.2.7 // indirect
 	github.com/leodido/go-urn v1.4.0 // indirect

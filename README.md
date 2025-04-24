@@ -12,7 +12,7 @@ pprofsvr是一个基于Go语言开发的轻量级Profile文件服务器，用于
 
 ### 安装
 ```bash
-go get github.com/xiateng/pprofsvr
+go install github.com/xiateng/pprofsvr
 ```
 
 ### 运行
